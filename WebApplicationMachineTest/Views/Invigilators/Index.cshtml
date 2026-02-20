@@ -1,0 +1,231 @@
+﻿@model List<WebApplicationMachineTest.VieModels.StudentRecordViewModel>
+
+@{
+    ViewData["Title"] = "Invigilator Dashboard";
+}
+
+<div class="container mt-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">Invigilator Dashboard</h3>
+        <div>
+            <a asp-action="AddStudent" class="btn btn-success">+ Add Student</a>
+            <a asp-action="Logout" class="btn btn-danger">Logout</a>
+        </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="mb-3">
+        <input type="text" id="searchInput"
+               class="form-control"
+               placeholder="Search by Roll Number or Name..." />
+    </div>
+
+    <!-- TABLE -->
+    <div class="card shadow">
+        <div class="card-body">
+            <table class="table table-bordered text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Roll</th>
+                        <th>Name</th>
+                        <th>Maths</th>
+                        <th>Physics</th>
+                        <th>Chemistry</th>
+                        <th>English</th>
+                        <th>Programming</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var student in Model)
+                    {
+                        <tr class="student-row">
+                            <td class="roll">@student.RollNumber</td>
+                            <td class="name">@student.FullName</td>
+                            <td>@student.Maths</td>
+                            <td>@student.Physics</td>
+                            <td>@student.Chemistry</td>
+                            <td>@student.English</td>
+                            <td>@student.Programming</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm editBtn"
+                                        data-roll="@student.RollNumber"
+                                        data-maths="@student.Maths"
+                                        data-physics="@student.Physics"
+                                        data-chemistry="@student.Chemistry"
+                                        data-english="@student.English"
+                                        data-programming="@student.Programming">
+                                    Edit
+                                </button>
+
+                                <button class="btn btn-danger btn-sm deleteBtn"
+                                        data-roll="@student.RollNumber">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="editModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header bg-warning">
+                <h5>Edit Student Marks</h5>
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="editForm">
+
+                    <input type="hidden" id="editRollNumber" />
+
+                    <div class="mb-2">
+                        <label>Roll Number</label>
+                        <input type="text" id="displayRoll"
+                               class="form-control" disabled />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Maths</label>
+                        <input type="number" id="editMaths"
+                               class="form-control" min="1" max="100" required />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Physics</label>
+                        <input type="number" id="editPhysics"
+                               class="form-control" min="1" max="100" required />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Chemistry</label>
+                        <input type="number" id="editChemistry"
+                               class="form-control" min="1" max="100" required />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>English</label>
+                        <input type="number" id="editEnglish"
+                               class="form-control" min="1" max="100" required />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Programming</label>
+                        <input type="number" id="editProgramming"
+                               class="form-control" min="1" max="100" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-warning w-100">
+                        Update
+                    </button>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+                <h5>Confirm Delete</h5>
+            </div>
+
+            <div class="modal-body">
+                <p>Are you sure you want to delete this student?</p>
+                <input type="hidden" id="deleteRollNumber" />
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Cancel
+                </button>
+                <button id="confirmDelete"
+                        class="btn btn-danger">
+                    Delete
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+
+        // SEARCH
+        $("#searchInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $(".student-row").filter(function () {
+                $(this).toggle(
+                    $(this).find(".roll").text().toLowerCase().indexOf(value) > -1 ||
+                    $(this).find(".name").text().toLowerCase().indexOf(value) > -1
+                );
+            });
+        });
+
+        // EDIT OPEN
+        $(".editBtn").click(function () {
+
+            var roll = $(this).data("roll");
+
+            $("#editRollNumber").val(roll);
+            $("#displayRoll").val(roll);
+
+            $("#editMaths").val($(this).data("maths"));
+            $("#editPhysics").val($(this).data("physics"));
+            $("#editChemistry").val($(this).data("chemistry"));
+            $("#editEnglish").val($(this).data("english"));
+            $("#editProgramming").val($(this).data("programming"));
+
+            new bootstrap.Modal(document.getElementById('editModal')).show();
+        });
+
+        // EDIT AJAX
+        $("#editForm").submit(function (e) {
+            e.preventDefault();
+
+            $.post('/Invigilators/EditRecord', {
+                rollNumber: $("#editRollNumber").val(),
+                maths: $("#editMaths").val(),
+                physics: $("#editPhysics").val(),
+                chemistry: $("#editChemistry").val(),
+                english: $("#editEnglish").val(),
+                programming: $("#editProgramming").val()
+            }, function () {
+                location.reload();
+            });
+        });
+
+        // DELETE OPEN
+        $(".deleteBtn").click(function () {
+            $("#deleteRollNumber").val($(this).data("roll"));
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        });
+
+        // DELETE AJAX
+        $("#confirmDelete").click(function () {
+            $.post('/Invigilators/Delete', {
+                rollNumber: $("#deleteRollNumber").val()
+            }, function () {
+                location.reload();
+            });
+        });
+
+    </script>
+}

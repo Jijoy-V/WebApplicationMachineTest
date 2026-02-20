@@ -1,0 +1,56 @@
+﻿@model WebApplicationMachineTest.VieModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="container vh-100 d-flex justify-content-center align-items-center">
+
+    <div class="card shadow-lg p-4" style="width: 400px; border-radius: 15px;">
+
+        <div class="text-center mb-4">
+            <h3 class="fw-bold text-primary">School Management System</h3>
+            <p class="text-muted">Please login to continue</p>
+        </div>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger text-center">
+                @ViewBag.Error
+            </div>
+        }
+
+        <form asp-action="Login" method="post">
+
+            <!-- Username -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Username</label>
+                <input asp-for="Username" class="form-control" placeholder="Enter username" />
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Password</label>
+                <input asp-for="Password" type="password" class="form-control" placeholder="Enter password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <!-- Login Button -->
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">
+                    Login
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
